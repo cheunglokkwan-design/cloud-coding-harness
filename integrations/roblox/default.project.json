@@ -1,0 +1,12 @@
+{
+  "name": "cch-fleet-viewer",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "Shared": { "$path": "src/shared" }
+    },
+    "ServerScriptService": {
+      "FleetViewer": { "$path": "src/server/FleetViewer.server.luau" }
+    }
+  }
+}

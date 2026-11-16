@@ -1,0 +1,30 @@
+# docker compose up --build   ->   http://localhost:8080
+#
+# The orchestrator starts sandboxes as sibling containers through the host's Docker socket.
+# CCH_DATA_DIR is mounted at the *same path* inside the orchestrator so the workspace and
+# mirror paths it hands to Docker are valid on the host.
+services:
+  sandbox-image:
+    build: ./sandbox-image
+    image: cch-sandbox:latest
+    command: ["true"]
+    restart: "no"
+
+  harness:
+    build: .
+    image: cch-harness:latest
+    depends_on:
+      sandbox-image:
+        condition: service_completed_successfully
+    ports:
+      - "8080:8080"
+    environment:
+      HARNESS_DATA_DIR: ${CCH_DATA_DIR:-/tmp/cch-data}
+      HARNESS_SANDBOX_DRIVER: docker
+      HARNESS_WARM_POOL_SIZE: ${CCH_WARM_POOL:-8}
+      HARNESS_DEFAULT_PROVIDER: ${CCH_DEFAULT_PROVIDER:-scripted}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${CCH_DATA_DIR:-/tmp/cch-data}:${CCH_DATA_DIR:-/tmp/cch-data}
+    restart: unless-stopped
